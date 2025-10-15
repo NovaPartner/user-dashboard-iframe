@@ -125,9 +125,6 @@ http://localhost:8000/index.html?driverid=10003
 
 ## 📊 API Endpoints
 
-### GET `/` (doGet)
-Рендерить HTML сторінку (застарілий метод, не використовується)
-
 ### POST `/` (doPost)
 
 #### Operation: `get_driver_info`

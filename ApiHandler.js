@@ -1,74 +1,3 @@
-function doGet(e) {
-  // Якщо це API запит (action=getData)
-  if (e.parameter.action === 'getData') {
-    const driverId = e.parameter.driverId;
-    
-    if (!driverId) {
-      return ContentService.createTextOutput(JSON.stringify({
-        error: 'Brak ID kierowcy'
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const driverData = Chatbot.getDriverByIdentifier(driverId);
-    
-    if (!driverData) {
-      return ContentService.createTextOutput(JSON.stringify({
-        driver_identifier: '',
-        full_name: 'Nie znaleziono',
-        balance: 0,
-        city: '',
-        phone_number: ''
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify(driverData))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  // Якщо це звичайний запит для HTML
-  const template = HtmlService.createTemplateFromFile('Login');
-  const userId = e.parameter.driverid || e.parameter.id || '';
-  
-  // Перевіряємо кеш
-  const cache = CacheService.getScriptCache();
-  const cacheKey = `driver_${userId}`;
-  let userData = JSON.parse(cache.get(cacheKey) || 'null');
-  
-  if (!userData) {
-    // Якщо немає в кеші - завантажуємо з бази
-    const usersData = Chatbot.getDriverByIdentifier(userId);
-    userData = usersData || {
-      fullName: 'Користувача не знайдено в базі',
-      salary: '0.00',
-      debts: '0.00',
-      phone: '',
-      city: ''
-    };
-    
-    // Зберігаємо в кеш на 5 хвилин
-    cache.put(cacheKey, JSON.stringify(userData), 300);
-  }
-
-  template.userId = userId;
-  template.fullName = userData.full_name;
-  template.salary = userData.balance;
-  template.city = userData.city;
-  template.phone = userData.phone_number;
-  template.driverId = userId;
-
-  return template.evaluate()
-    .setTitle('Panel Osobisty')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-function doOptions(e) {
-  return ContentService.createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
-
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
@@ -151,21 +80,6 @@ function postDriverInfo(driverData) {
     success: true,
     message: 'Wniosek został przyjęty'
   })).setMimeType(ContentService.MimeType.JSON);
-}
-
-function getDriverData(driverId) {
-  const driverData = Chatbot.getDriverByIdentifier(driverId);
-  
-  if (!driverData)
-    return {
-      driver_identifier: '',
-      full_name: 'Nie znaleziono',
-      balance: 0,
-      city: '',
-      phone_number: ''
-    };
-  
-  return driverData;
 }
 
 function createNewDriver(driverData) {
