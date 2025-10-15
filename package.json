@@ -1,0 +1,9 @@
+{
+  "name": "nova-partner-iframe",
+  "version": "1.0.0",
+  "description": "Nova Partner iFrame",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
+
