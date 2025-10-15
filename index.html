@@ -12,6 +12,10 @@
       box-sizing: border-box;
     }
     
+    html {
+      overflow-x: hidden;
+    }
+    
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0f172a;
@@ -21,6 +25,11 @@
       align-items: flex-start;
       padding: 0;
       position: relative;
+      overflow-x: hidden;
+    }
+    
+    body.loading {
+      overflow: hidden;
     }
     
     .loader-wrapper {
@@ -82,6 +91,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow-x: hidden;
     }
     
     .header,
@@ -465,6 +475,7 @@
     }
     
     window.addEventListener('load', function() {
+      document.body.classList.add('loading');
       driverId = getDriverIdFromURL();
       
       if (driverId)
@@ -503,6 +514,7 @@
         document.getElementById('submitBtn').disabled = false;
         
         document.getElementById('loader').classList.add('hidden');
+        document.body.classList.remove('loading');
         setTimeout(function() {
           document.querySelector('.container').classList.add('visible');
         }, 300);
@@ -515,6 +527,7 @@
     
     function showError(message) {
       document.getElementById('loader').classList.add('hidden');
+      document.body.classList.remove('loading');
       document.getElementById('fullName').textContent = message;
       setTimeout(function() {
         document.querySelector('.container').classList.add('visible');
