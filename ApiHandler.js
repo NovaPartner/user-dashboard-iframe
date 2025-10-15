@@ -80,6 +80,9 @@ function doPost(e) {
     if (operationName === 'post_driver_info')
       return postDriverInfo(data.driverData);
     
+    if (operationName === 'create_driver')
+      return createNewDriver(data.driverData);
+    
     return ContentService.createTextOutput(JSON.stringify({
       error: 'Невідома операція'
     })).setMimeType(ContentService.MimeType.JSON);
@@ -165,4 +168,47 @@ function getDriverData(driverId) {
   return driverData;
 }
 
+function createNewDriver(driverData) {
+  if (!driverData)
+    return ContentService.createTextOutput(JSON.stringify({
+      error: 'Brak danych kierowcy'
+    })).setMimeType(ContentService.MimeType.JSON);
+  
+  if (!driverData.driver_identifier || !driverData.full_name)
+    return ContentService.createTextOutput(JSON.stringify({
+      error: 'ID i imię kierowcy są wymagane'
+    })).setMimeType(ContentService.MimeType.JSON);
+  
+  const spreadsheet = SpreadsheetApp.openById('1GfjZY4o-J_ocHUkd2Lj7_mq6OcLMmk6yt7g9gBMwYak');
+  const sheet = spreadsheet.getSheetByName('Drivers') || spreadsheet.getSheetByName('Sheet1');
+  
+  if (!sheet)
+    return ContentService.createTextOutput(JSON.stringify({
+      error: 'Arkusz Drivers не знайдено'
+    })).setMimeType(ContentService.MimeType.JSON);
+  
+  const existingDriver = Chatbot.getDriverByIdentifier(driverData.driver_identifier);
+  if (existingDriver)
+    return ContentService.createTextOutput(JSON.stringify({
+      error: 'Kierowca z takim ID już istnieje'
+    })).setMimeType(ContentService.MimeType.JSON);
+  
+  const rowData = [
+    driverData.driver_identifier || '',
+    driverData.full_name || '',
+    driverData.phone_number || '',
+    driverData.city || '',
+    driverData.email || '',
+    0,
+    new Date()
+  ];
+  
+  sheet.appendRow(rowData);
+  
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    message: 'Kierowca został pomyślnie dodany',
+    driver_id: driverData.driver_identifier
+  })).setMimeType(ContentService.MimeType.JSON);
+}
 

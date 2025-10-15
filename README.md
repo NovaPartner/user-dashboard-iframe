@@ -173,6 +173,44 @@ http://localhost:8000/index.html?driverid=10003
 }
 ```
 
+#### Operation: `create_driver` (Створення нового водія)
+**Request:**
+```json
+{
+  "operationName": "create_driver",
+  "driverData": {
+    "driver_identifier": "10004",
+    "full_name": "Anna Nowak",
+    "phone_number": "48987654321",
+    "city": "Kraków",
+    "email": "anna.nowak@example.com"
+  }
+}
+```
+
+**Response (успіх):**
+```json
+{
+  "success": true,
+  "message": "Kierowca został pomyślnie dodany",
+  "driver_id": "10004"
+}
+```
+
+**Response (помилка - водій вже існує):**
+```json
+{
+  "error": "Kierowca z takim ID już istnieje"
+}
+```
+
+**Response (помилка - відсутні обов'язкові поля):**
+```json
+{
+  "error": "ID i imię kierowcy są wymagane"
+}
+```
+
 ## 🔐 Безпека
 
 - ✅ CORS налаштований коректно
