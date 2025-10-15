@@ -442,43 +442,19 @@
     
     window.addEventListener('load', function() {
       driverId = getDriverIdFromURL();
-      console.log('ID z URL:', driverId);
       
-      if (driverId) {
-        // Спочатку просто показуємо ID
-        document.getElementById('userId').textContent = driverId;
-        document.getElementById('fullName').textContent = 'ID успішно підвантажено!';
-        
-        // Приховуємо loader
-        document.getElementById('loader').classList.add('hidden');
-        setTimeout(function() {
-          document.querySelector('.container').classList.add('visible');
-        }, 300);
-        
-        // Тепер завантажуємо дані
+      if (driverId)
         loadDriverData();
-      } else {
-        // Якщо ID немає
-        document.getElementById('userId').textContent = 'Nie ma ID';
-        document.getElementById('fullName').textContent = 'Brak ID w URL';
-        document.getElementById('loader').classList.add('hidden');
-        setTimeout(function() {
-          document.querySelector('.container').classList.add('visible');
-        }, 300);
-      }
+      else
+        showError('Brak ID w URL');
     });
     
     async function loadDriverData() {
-      console.log('=== ПОЧАТОК loadDriverData ===');
-      console.log('driverId:', driverId);
-      console.log('API_URL:', API_URL);
-      
       try {
         const requestBody = {
           operationName: 'get_driver_info',
           driverId: driverId
         };
-        console.log('Відправляємо POST запит з body:', JSON.stringify(requestBody));
         
         const response = await fetch(API_URL, {
           method: 'POST',
@@ -488,31 +464,28 @@
           body: JSON.stringify(requestBody)
         });
         
-        console.log('Отримали response:', response);
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error('Błąd sieci: ' + response.status);
-        }
         
         const data = await response.json();
-        console.log('Dane otrzymane:', data);
         currentDriverData = data;
         
-        // Заповнюємо поля
         document.getElementById('fullName').textContent = data.full_name || '-';
         document.getElementById('userId').textContent = data.driver_identifier || driverId;
         document.getElementById('salary').textContent = (data.balance ? data.balance.toFixed(2) : '0.00') + ' PLN';
         document.getElementById('city').textContent = data.city || '-';
         document.getElementById('phone').textContent = data.phone_number ? '+' + data.phone_number : '-';
         
-        // Активуємо кнопку
         document.getElementById('submitBtn').disabled = false;
+        
+        document.getElementById('loader').classList.add('hidden');
+        setTimeout(function() {
+          document.querySelector('.container').classList.add('visible');
+        }, 300);
         
       } catch (error) {
         console.error('Błąd:', error);
-        document.getElementById('fullName').textContent = 'Błąd API: ' + error.message;
+        showError('Błąd API: ' + error.message);
       }
     }
     
@@ -542,8 +515,6 @@
           driverData: currentDriverData
         };
         
-        console.log('Відправляємо заявку:', JSON.stringify(requestBody));
-        
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
@@ -552,20 +523,16 @@
           body: JSON.stringify(requestBody)
         });
         
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error('Błąd sieci: ' + response.status);
-        }
         
         const result = await response.json();
-        console.log('Результат:', result);
         
-        if (result.success) {
+        if (result.success)
           onApplicationSuccess();
-        } else {
+        else
           throw new Error(result.error || 'Nieznany błąd');
-        }
       } catch (error) {
-        console.error('Błąd:', error);
         onApplicationError(error);
       }
     }
@@ -574,6 +541,16 @@
       document.getElementById('modalSpinner').style.display = 'none';
       document.getElementById('modalSuccess').style.display = 'block';
       document.getElementById('modalText').textContent = 'Dziękujemy, Twój wniosek został przyjęty';
+      
+      setTimeout(function() {
+        document.getElementById('modal').classList.remove('active');
+        document.getElementById('submitBtn').disabled = false;
+      }, 3000);
+    }
+    
+    function onApplicationError(error) {
+      document.getElementById('modalSpinner').style.display = 'none';
+      document.getElementById('modalText').textContent = 'Błąd! Spróbuj ponownie później';
       
       setTimeout(function() {
         document.getElementById('modal').classList.remove('active');
